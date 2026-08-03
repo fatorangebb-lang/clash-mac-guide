@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clash for Mac — VPN / 代理配置指南</title>
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #161618;
+    --surface2: #1c1c1f;
+    --border: #2a2a2e;
+    --text: #e4e4e7;
+    --text2: #a1a1aa;
+    --text3: #71717a;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,.15);
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --code-bg: #1e1e24;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Layout */
+  .page {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    padding: 40px 28px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sidebar-logo::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .sidebar nav a {
+    display: block;
+    padding: 7px 0;
+    font-size: 13px;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color .15s;
+    border-left: 2px solid transparent;
+    padding-left: 12px;
+    margin-left: -14px;
+  }
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  .sidebar nav a + a { margin-top: 2px; }
+
+  /* Main */
+  .main {
+    padding: 48px 64px 120px;
+    max-width: 820px;
+  }
+
+  .hero {
+    margin-bottom: 56px;
+  }
+  .hero .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 4px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+  .hero p {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 560px;
+  }
+
+  /* Sections */
+  section { margin-bottom: 56px; }
+  section h2 {
+    font-size: 22px;
+    font-weight: 650;
+    letter-spacing: -.01em;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 28px 0 10px;
+    color: var(--text);
+  }
+  section p {
+    color: var(--text2);
+    margin-bottom: 12px;
+    font-size: 14.5px;
+  }
+
+  /* Steps */
+  .steps { list-style: none; }
+  .steps li {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 22px;
+    counter-increment: step;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .steps li strong {
+    display: block;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .steps li p { margin-bottom: 0; font-size: 13.5px; }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 16px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+    padding: 12px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 10px 16px;
+    color: var(--text2);
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface); }
+
+  /* Code */
+  code {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: var(--code-bg);
+    color: #c9d1d9;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 16px 0;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* Callouts */
+  .callout {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 13.5px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .callout .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout.warn  { background: rgba(245,158,11,.06); border-color: rgba(245,158,11,.2); }
+  .callout.info  { background: rgba(59,130,246,.06); border-color: rgba(59,130,246,.2); }
+  .callout.tip   { background: rgba(34,197,94,.06);  border-color: rgba(34,197,94,.2); }
+
+  /* Mode Cards */
+  .mode-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .mode-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .mode-card .mode-name {
+    font-size: 15px;
+    font-weight: 650;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .mode-card .mode-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.55;
+  }
+
+  /* Summary Block */
+  .summary-block {
+    background: linear-gradient(135deg, var(--surface), var(--surface2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-top: 32px;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+  .summary-block strong { color: var(--accent); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 32px 24px 80px; }
+    .mode-cards { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">Clash for Mac</div>
+    <nav>
+      <a href="#clients" class="active">客戶端選擇</a>
+      <a href="#setup">配置流程</a>
+      <a href="#modes">代理模式</a>
+      <a href="#tun">增強模式</a>
+      <a href="#scenarios">使用場景</a>
+      <a href="#config">設定檔參考</a>
+      <a href="#troubleshoot">快速排錯</a>
+      <a href="#summary">總結</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <div class="hero">
+      <span class="badge">Documentation</span>
+      <h1>Clash for Mac<br>VPN / 代理配置指南</h1>
+      <p>Clash 本身是代理工具而非傳統 VPN，但在 macOS 上通過 TUN 模式（增強模式）可以實現類似 VPN 的全局流量接管效果。</p>
+    </div>
+
+    <section id="clients">
+      <h2>1. 選哪個客戶端？</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>客戶端</th><th>特點</th><th>推薦</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>ClashX Pro</strong></td>
+              <td>有增強模式（TUN），支持 rule / global / direct</td>
+              <td><span style="color:var(--green)">&#10003; 推薦</span></td>
+            </tr>
+            <tr>
+              <td><strong>Clash Verge Rev</strong></td>
+              <td>開源、界面現代、支持 TUN、持續維護</td>
+              <td><span style="color:var(--green)">&#10003; 推薦</span></td>
+            </tr>
+            <tr>
+              <td><strong>ClashX</strong></td>
+              <td>基礎版、無增強模式、僅系統代理</td>
+              <td><span style="color:var(--text3)">一般</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="setup">
+      <h2>2. 核心配置流程</h2>
+
+      <h3>第一步：導入訂閱鏈接</h3>
+      <ol class="steps">
+        <li>
+          <strong>打開設定</strong>
+          <p>ClashX Pro &#8594; 菜單欄圖標 &#8594; <code>Config</code> &#8594; <code>Remote Config</code></p>
+        </li>
+        <li>
+          <strong>添加訂閱</strong>
+          <p>點擊 <code>+</code> 添加訂閱 URL（從你的機場 / 服務商獲取）</p>
+        </li>
+        <li>
+          <strong>拉取節點</strong>
+          <p>點擊 <code>Update</code> 拉取最新節點列表</p>
+        </li>
+      </ol>
+
+      <h3>第二步：選擇代理模式</h3>
+      <div class="mode-cards">
+        <div class="mode-card">
+          <div class="mode-name">Rule 規則</div>
+          <div class="mode-desc">按配置規則分流，國內直連、國外代理<br><span style="color:var(--green)">最常用</span></div>
+        </div>
+        <div class="mode-card">
+          <div class="mode-name">Global 全局</div>
+          <div class="mode-desc">所有流量都走代理節點</div>
+        </div>
+        <div class="mode-card">
+          <div class="mode-name">Direct 直連</div>
+          <div class="mode-desc">全部不走代理，直接連接</div>
+        </div>
+      </div>
+
+      <h3>第三步：開啟增強模式</h3>
+      <p>這是實現 <strong>VPN 體驗</strong> 的關鍵步驟：</p>
+      <ul class="steps">
+        <li>
+          <strong>系統代理</strong>
+          <p>菜單欄 &#8594; <code>Set as System Proxy</code>（基礎代理，瀏覽器級別）</p>
+        </li>
+        <li>
+          <strong>增強模式 / TUN</strong>
+          <p>ClashX Pro：菜單欄 &#8594; <strong>增強模式</strong> 打鉤<br>
+             Clash Verge：設定 &#8594; <strong>TUN 模式</strong> 開啟</p>
+        </li>
+      </ul>
+
+      <div class="callout warn">
+        <span class="icon">&#9888;&#65039;</span>
+        <div>TUN 模式會創建虛擬網卡接管全部流量，像 VPN 一樣工作。終端、App Store 等不走系統代理的軟件也能被代理。</div>
+      </div>
+    </section>
+
+    <section id="modes">
+      <h2>3. 三種代理模式詳解</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>模式</th><th>行為</th><th>適用場景</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Rule（規則）</strong></td><td>按配置文件規則分流</td><td>日常上網，國內直連、國外代理</td></tr>
+            <tr><td><strong>Global（全局）</strong></td><td>所有流量走代理</td><td>需要全部流量出國時</td></tr>
+            <tr><td><strong>Direct（直連）</strong></td><td>全部不走代理</td><td>暫時關閉代理</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tun">
+      <h2>4. 增強模式（TUN）— VPN 體驗的關鍵</h2>
+      <p>ClashX Pro 的 <strong>Enhanced Mode</strong> 和 Clash Verge 的 <strong>TUN 模式</strong> 本質相同：在系統層面創建虛擬網絡接口，接管所有 TCP/UDP 流量。</p>
+
+      <div class="callout info">
+        <span class="icon">&#128161;</span>
+        <div><strong>終端代理</strong>：若不想開 TUN，也可在終端手動設定：<br>
+        <code>export https_proxy=http://127.0.0.1:7890</code></div>
+      </div>
+    </section>
+
+    <section id="scenarios">
+      <h2>5. 常見場景速查</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>場景</th><th>推薦配置</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>日常上網</td><td>Rule 模式 + 系統代理（夠用）</td></tr>
+            <tr><td>終端代理</td><td>增強模式 / TUN 模式（必開）</td></tr>
+            <tr><td>所有流量出國</td><td>Global 模式 + 增強模式</td></tr>
+            <tr><td>遊戲加速</td><td>TUN 模式 + 選擇低延遲節點</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="config">
+      <h2>6. 配置文件關鍵字段</h2>
+      <p>如果你自己編輯 <code>config.yaml</code>：</p>
+      <pre><code><span style="color:#8b949e"># 代理端口</span>
+<span style="color:#ff7b72">port</span>: <span style="color:#a5d6ff">7890</span>          <span style="color:#8b949e"># HTTP</span>
+<span style="color:#ff7b72">socks-port</span>: <span style="color:#a5d6ff">7891</span>    <span style="color:#8b949e"># SOCKS5</span>
+
+<span style="color:#8b949e"># 增強模式（TUN）—— 這就是"VPN"體驗的核心</span>
+<span style="color:#ff7b72">tun</span>:
+  <span style="color:#ff7b72">enable</span>: <span style="color:#79c0ff">true</span>
+  <span style="color:#ff7b72">stack</span>: <span style="color:#a5d6ff">system</span>      <span style="color:#8b949e"># Mac 用 system，Linux 用 gvisor</span>
+  <span style="color:#ff7b72">dns-hijack</span>:
+    - <span style="color:#a5d6ff">any:53</span>
+
+<span style="color:#8b949e"># DNS 防泄露</span>
+<span style="color:#ff7b72">dns</span>:
+  <span style="color:#ff7b72">enable</span>: <span style="color:#79c0ff">true</span>
+  <span style="color:#ff7b72">listen</span>: <span style="color:#a5d6ff">0.0.0.0:53</span>
+  <span style="color:#ff7b72">enhanced-mode</span>: <span style="color:#a5d6ff">fake-ip</span>   <span style="color:#8b949e"># 或 redir-host</span>
+  <span style="color:#ff7b72">nameserver</span>:
+    - <span style="color:#a5d6ff">223.5.5.5</span>    <span style="color:#8b949e"># 國內 DNS</span>
+    - <span style="color:#a5d6ff">119.29.29.29</span>
+  <span style="color:#ff7b72">fallback</span>:
+    - <span style="color:#a5d6ff">8.8.8.8</span>      <span style="color:#8b949e"># 國外 DNS</span>
+    - <span style="color:#a5d6ff">1.1.1.1</span></code></pre>
+    </section>
+
+    <section id="troubleshoot">
+      <h2>7. 快速排錯</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>問題</th><th>檢查</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>瀏覽器不走代理</td><td>確認 <strong>Set as System Proxy</strong> 已勾選</td></tr>
+            <tr><td>終端 curl 不通</td><td>開 <strong>增強模式</strong>，或手動 <code>export https_proxy=http://127.0.0.1:7890</code></td></tr>
+            <tr><td>部分 App 無法代理</td><td>開 <strong>TUN 模式</strong>（它們繞過系統代理）</td></tr>
+            <tr><td>國內網站變慢</td><td>檢查規則是否正確，確保國內域名走 DIRECT</td></tr>
+            <tr><td>UDP 遊戲 / FaceTime</td><td>需要 <strong>TUN 模式</strong> 支援 UDP 轉發</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="summary">
+      <h2>8. 總結</h2>
+      <div class="summary-block">
+        <strong>Rule 模式 + 系統代理</strong> = 日常首選<br>
+        <strong>開增強模式（TUN）</strong> = 當需要「像 VPN 一樣」接管所有流量時用
+      </div>
+      <p style="margin-top:20px; font-size:13px; color:var(--text3);">
+        如果你有具體的配置文件或報錯信息，可以貼出來我幫你看看！
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section');
+  const navLinks = document.querySelectorAll('.sidebar nav a');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector('.sidebar nav a[href="#' + e.target.id + '"]');
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
