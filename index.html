@@ -296,6 +296,25 @@
     .mode-cards { grid-template-columns: 1fr; }
     .hero h1 { font-size: 26px; }
   }
+
+  /* Download Button */
+  .dl-btn {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-glow);
+    padding: 5px 12px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background .15s, color .15s;
+  }
+  .dl-btn:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
 </style>
 </head>
 <body>
@@ -329,23 +348,26 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>客戶端</th><th>特點</th><th>推薦</th></tr>
+            <tr><th>客戶端</th><th>特點</th><th>推薦</th><th>下載</th></tr>
           </thead>
           <tbody>
             <tr>
               <td><strong>ClashX Pro</strong></td>
               <td>有增強模式（TUN），支持 rule / global / direct</td>
               <td><span style="color:var(--green)">&#10003; 推薦</span></td>
+              <td><a class="dl-btn" href="https://github.com/bannedbook/ClashX/releases/download/1.118.0/ClashX-Pro.dmg" target="_blank">&#8595; ClashX Pro.dmg</a></td>
             </tr>
             <tr>
               <td><strong>Clash Verge Rev</strong></td>
               <td>開源、界面現代、支持 TUN、持續維護</td>
               <td><span style="color:var(--green)">&#10003; 推薦</span></td>
+              <td><a class="dl-btn" href="https://github.com/clash-verge-rev/clash-verge-rev/releases/latest" target="_blank">&#8595; Apple M / Intel</a></td>
             </tr>
             <tr>
               <td><strong>ClashX</strong></td>
               <td>基礎版、無增強模式、僅系統代理</td>
               <td><span style="color:var(--text3)">一般</span></td>
+              <td><a class="dl-btn" href="https://github.com/bannedbook/ClashX/releases/download/1.118.0/ClashX.dmg" target="_blank">&#8595; ClashX.dmg</a></td>
             </tr>
           </tbody>
         </table>
